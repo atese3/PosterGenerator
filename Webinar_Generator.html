@@ -1,0 +1,429 @@
+<html>
+
+<head>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+    <script src="qr/qr-code-with-logo.browser.min.js"></script>
+    <link href="https://uicookies.com/demo/theme/onlinecv/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://uicookies.com/demo/theme/onlinecv/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'handelgotdbolregular';
+            src: url('Font/handel_gothic_bold-webfont.woff2') format('woff2'), url('Font/handel_gothic_bold-webfont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <script>
+        var fontFamily = 'handelgotdbolregular';
+        var canvas;
+        var ctx;
+        var img;
+        $(document).ready(function () {
+            document.fonts.load("60px handelgotdbolregular", "ß").then(() => { });
+
+
+            img = document.getElementById("webinar_template");
+            canvas = document.getElementById('poster');
+            ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            ctx.font = '60px ' + fontFamily;
+
+
+        });
+
+        function imageLoad() {
+            resetCanvas();
+        }
+        function generateQR() {
+
+            var txtLink = document.getElementById("link").value;
+
+            QrCodeWithLogo.toCanvas({
+                canvas: document.getElementById('webinar_qr'),
+                content: txtLink,
+                width: 250,
+                nodeQrCodeOptions: {
+                    color: {
+                        dark: '#4C75A0'
+                    }
+                }
+            }).then(() => {
+                var qr_img = document.getElementById("webinar_qr");
+                ctx.drawImage(qr_img, 625, 600);
+            })
+        }
+
+        function resetCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(img, 0, 0);
+
+            updateImage();
+        }
+
+        function updateImage() {
+            console.log("updateImage Start");
+
+            var txtDayMonth = document.getElementById("dayMonth").value;
+            var txtDay = document.getElementById("day").value;
+            var txtTime = document.getElementById("time").value;
+            var txtLink = document.getElementById("link").value;
+
+            // Max Width 600
+
+            for (var iter = 1; iter < 7; iter++) {
+                var inputFSize = document.getElementById("title" + iter + "Size");
+                var fSize = "60px";
+                if (inputFSize.value != null && inputFSize.value != undefined && inputFSize.value != "") {
+                    fSize = inputFSize.value + "px";
+                }
+                else {
+                    inputFSize.value = parseInt(inputFSize.getAttribute("standartValue"), 10);
+                    fsize = inputFSize.getAttribute("standartValue") + "px";
+                }
+
+                var inputTopPad = document.getElementById("title" + iter + "PadTop");
+                var tPad = 197;
+                if (inputTopPad.value != null && inputTopPad.value != undefined && inputTopPad.value != "") {
+                    tPad = parseInt(inputTopPad.value, 10);
+                }
+                else {
+                    inputTopPad.value = parseInt(inputTopPad.getAttribute("standartValue"), 10);
+                    tPad = parseInt(inputTopPad.getAttribute("standartValue"), 10);
+                }
+
+                ctx.font = fSize + " " + fontFamily;
+                ctx.fillStyle = '#4C75A0';
+                var height = parseInt(ctx.font.match(/\d+/), 10);
+                var txtTitle = document.getElementById("title" + iter).value;
+                var width = ctx.measureText(txtTitle).width;
+                if (width > 600) {
+                    //Split
+                    var res = Split(txtTitle);
+                    for (var j = 0; j < res.length; j++) {
+                        var number = iter + j;
+                        document.getElementById("title" + number).value = res[j];
+                    }
+                }
+                else {
+                    ctx.fillText(txtTitle, 755 - (width / 2), tPad);
+                }
+
+            }
+
+            ctx.font = '60px ' + fontFamily;
+            ctx.fillStyle = '#4C75A0';
+            var width = ctx.measureText("Konuşmacı").width;
+            ctx.fillText("Konuşmacı", 755 - (width / 2), 456);
+
+            var height = parseInt(ctx.font.match(/\d+/), 10);
+            for (var iter = 1; iter < 4; iter++) {
+                var txtSpeaker = document.getElementById("speaker" + iter).value;
+                var width = ctx.measureText(txtSpeaker).width;
+                if (width > 600) {
+                    //Split
+                    var res = Split(txtSpeaker);
+                    for (var j = 0; j < res.length; j++) {
+                        var number = iter + j;
+                        document.getElementById("speaker" + number).value = res[j];
+                    }
+                }
+                else {
+                    ctx.fillText(txtSpeaker, 755 - (width / 2), 530 + ((iter - 1) * height));
+                }
+
+            }
+
+            ctx.font = '48px ' + fontFamily;
+            ctx.fillStyle = '#FFFFFF';
+            var width = ctx.measureText(txtDayMonth.turkishToUpper()).width;
+            ctx.fillText(txtDayMonth.turkishToUpper(), 175 - (width / 2), 320);
+
+            ctx.font = '48px ' + fontFamily;
+            ctx.fillStyle = '#FFFFFF';
+            var width = ctx.measureText(txtDay.turkishToUpper()).width;
+            ctx.fillText(txtDay.turkishToUpper(), 177 - (width / 2), 380);
+
+            ctx.font = '48px ' + fontFamily;
+            ctx.fillStyle = '#FFFFFF';
+            var width = ctx.measureText("SAAT " + txtTime.turkishToUpper()).width;
+            ctx.fillText("SAAT " + txtTime.turkishToUpper(), 179 - (width / 2), 440);
+
+            if (txtLink != "") {
+                generateQR();
+            }
+        }
+
+        String.prototype.turkishToUpper = function () {
+            var string = this;
+            var letters = { "i": "İ", "ş": "Ş", "ğ": "Ğ", "ü": "Ü", "ö": "Ö", "ç": "Ç", "ı": "I" };
+            string = string.replace(/(([iışğüçö]))/g, function (letter) { return letters[letter]; })
+            return string.toUpperCase();
+        }
+
+        function Split(letter) {
+            var middle = Math.ceil(letter.length / 2);
+            var left = 0;
+            var right = 0;
+            var list = ["", ""];
+            var letterArray = Array.from(letter);
+            if (letterArray[middle] == ' ') {
+                list[0] = letter.substring(0, middle);
+                list[1] = letter.substring(middle);
+            }
+            else {
+                for (var i = 0; i < 2; i++) {
+                    var isFind = true;
+                    var iter = 1;
+                    while (letterArray[middle + iter] != ' ') {
+                        if (letterArray.length < middle + iter || middle + iter < 0) {
+                            isFind = false;
+                            break;
+                        }
+                        if (i == 0) {
+                            iter++;
+                        }
+                        else {
+                            iter--;
+                        }
+                    }
+
+                    if (isFind) {
+                        if (iter < 0) {
+                            left = iter;
+                        }
+                        else {
+                            right = iter;
+                        }
+                    }
+
+                }
+
+                var split = Math.abs(left) < Math.abs(right) ? right : left;
+
+                list[0] = letter.substring(0, middle + split);
+                list[1] = letter.substring(middle + split + 1);
+                return list;
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <br/>
+        <div class="form-group row">
+            <label for="title" class="col-sm-2 col-form-label">BAŞLIK</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title1" placeholder="Satır 1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title1Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title1PadTop" value="197" standartValue="197"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title2" placeholder="Satır 2"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title2Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title2PadTop" value="257" standartValue="257"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title3" placeholder="Satır 3"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title3Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title3PadTop" value="317" standartValue="317"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title4" placeholder="Satır 4"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title4Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title4PadTop" value="377" standartValue="377"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title5" placeholder="Satır 5"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title5Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title5PadTop" value="437" standartValue="437"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="form-group col-sm-4">
+                        <input type="text" class="form-control" id="title6" placeholder="Satır 6"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Font: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title6Size" value="60" standartValue="60" step="1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <label for="title" class="col-sm-2 col-form-label">Top: </label>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <input type="number" class="form-control" id="title6PadTop" value="497" standartValue="497"
+                            step="1" oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="speaker" class="col-sm-2 col-form-label">KONUŞMACI</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="speaker1" placeholder="Satır 1"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="speaker2" placeholder="Satır 2"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="speaker3" placeholder="Satır 3"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="dayMonth" class="col-sm-2 col-form-label">GÜN AY</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="dayMonth" placeholder="Gün Ay"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="day" class="col-sm-2 col-form-label">GÜN</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="day" placeholder="Haftanın Hangi Günü"
+                            oninput="resetCanvas()" onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="time" class="col-sm-2 col-form-label">SAAT</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="time" placeholder="Saat" oninput="resetCanvas()"
+                            onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="link" class="col-sm-2 col-form-label">LINK</label>
+            <div class="col-sm-10">
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="link" placeholder="Link" oninput="resetCanvas()"
+                            onchange="resetCanvas()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <img hidden="hidden" id="webinar_template" src="Images/empty_webinar.png" onload="imageLoad()" />
+        <canvas hidden="hidden" id="webinar_qr"></canvas>
+
+        <div class="form-group row">
+            <div class="col-sm-10">
+                <div class="card border-light">
+                    <div class="card-header">Webinar Tanıtım Görseli</div>
+                    <div class="card-body">
+                        <canvas class="img-responsive" id="poster" style='width: 100%;height: 100%;'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
